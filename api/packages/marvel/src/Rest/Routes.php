@@ -36,8 +36,9 @@ use Marvel\Http\Controllers\LanguageController;
 use Marvel\Http\Controllers\ResourceController;
 
 
-
+Route::get('/test', [UserController::class, 'test']);
 Route::post('/register', [UserController::class, 'register']);
+Route::post('/confirm-register', [UserController::class, 'confirmRegister']);
 Route::post('/token', [UserController::class, 'token']);
 Route::post('/logout', [UserController::class, 'logout']);
 Route::post('/forget-password', [UserController::class, 'forgetPassword']);
@@ -52,6 +53,11 @@ Route::get('top-authors', [AuthorController::class, 'topAuthor']);
 Route::get('top-manufacturers', [ManufacturerController::class, 'topManufacturer']);
 Route::get('popular-products', [ProductController::class, 'popularProducts']);
 Route::get('check-availability', [ProductController::class, 'checkAvailability']);
+//vnpay
+Route::get('payment/vnpay/{pack_id}', [UserController::class, 'vnpay_index'])->name('payment.vnpay');
+Route::post('/create-vnpay', [UserController::class, 'create_vnpay']);
+Route::get('/return-vnpay', [UserController::class, 'return_vnpay'])->name('vnpay.return');
+
 
 
 Route::get("products/calculate-rental-price", [ProductController::class, 'calculateRentalPrice']);
@@ -158,6 +164,7 @@ Route::group(['middleware' => ['can:' . Permission::CUSTOMER, 'auth:sanctum']], 
     Route::put('users/{id}', [UserController::class, 'update']);
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::post('/update-contact', [UserController::class, 'updateContact']);
+    Route::post('/new-package', [UserController::class, 'newPackage']);
     Route::apiResource('address', AddressController::class, [
         'only' => ['destroy'],
     ]);
@@ -291,6 +298,7 @@ Route::group(['middleware' => ['permission:' . Permission::SUPER_ADMIN, 'auth:sa
         'only' => ['store'],
     ]);
     Route::apiResource('users', UserController::class);
+    Route::get('user-customers', [UserController::class, 'getCustomers']);
     Route::apiResource('authors', AuthorController::class, [
         'only' => ['update', 'destroy'],
     ]);

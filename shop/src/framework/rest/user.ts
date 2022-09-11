@@ -272,6 +272,11 @@ export function useRegister() {
         closeModal();
         return;
       }
+      if(data?.done){
+        toast.success('Register success, please check gmail');
+         closeModal();
+        return;
+      }
       if (!data.token) {
         toast.error(t('error-credential-wrong'));
       }

@@ -69,6 +69,14 @@ export const userClient = {
       search: HttpClient.formatSearchParams({ name }),
     });
   },
+  fetchMembers: ({ name, ...params }: Partial<UserQueryOptions>) => {
+    return HttpClient.get<UserPaginator>(API_ENDPOINTS.MEMBERS, {
+      searchJoin: 'and',
+      with: 'wallet',
+      ...params,
+      search: HttpClient.formatSearchParams({ name }),
+    });
+  },
   fetchUser: ({ id }: { id: string }) => {
     return HttpClient.get<User>(`${API_ENDPOINTS.USERS}/${id}`);
   },

@@ -54,7 +54,7 @@ function SidebarMenuItem({ className, item, depth = 0 }: any) {
             iconName: icon,
             className: 'w-5 h-5 me-4',
           })}
-          <p className="flex-1">{t(labelTransKey)}</p>
+          <p className="flex-1">{t(labelTransKey)}SDSDS</p>
           <span>{expandIcon}</span>
         </button>
       </motion.li>

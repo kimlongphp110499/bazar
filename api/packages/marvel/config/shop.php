@@ -10,7 +10,9 @@ return [
     | Set the admin email. This will be used to send email when user contact through contact page.
     |
     */
-    'admin_email' => env('ADMIN_EMAIL'),
+    'admin_email' => 'kimlongxutede110499@gmail.com',
+    'admin_password' => 'udiduxmhyzdsuiyj',
+    'shop_url_pakage' => 'http://localhost:3003',
 
     /*
     |--------------------------------------------------------------------------

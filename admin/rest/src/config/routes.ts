@@ -13,6 +13,7 @@ export const Routes = {
   storeKeepers: '/vendor/store_keepers',
   profileUpdate: '/profile-update',
   checkout: '/orders/checkout',
+  member: '/users/member',
   user: {
     ...routesFactory('/users'),
   },

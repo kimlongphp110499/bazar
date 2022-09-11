@@ -23,7 +23,8 @@
         "messagebird/php-rest-api": "^2.0",
         "omnipay/common": "dev-master",
         "omnipay/stripe": "dev-master",
-        "twilio/sdk": "^6.25"
+        "twilio/sdk": "^6.25",
+        "vinkla/hashids": "^9.1"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
@@ -38,7 +39,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "platform": {
+            "php": "7.4.21"
+         }
     },
     "extra": {
         "laravel": {

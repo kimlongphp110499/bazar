@@ -32,12 +32,14 @@ export const useLogoutMutation = () => {
 };
 
 export const useRegisterMutation = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   return useMutation(userClient.register, {
     onSuccess: () => {
-      toast.success(t('common:successfully-register'));
+      toast.success(t('common:successfully-register, please check mail !'));
+      router.replace(Routes.user.list);
     },
     // Always refetch after error or success:
     onSettled: () => {
@@ -152,6 +154,22 @@ export const useUsersQuery = (params: Partial<QueryOptionsType>) => {
   const { data, isLoading, error } = useQuery<UserPaginator, Error>(
     [API_ENDPOINTS.USERS, params],
     () => userClient.fetchUsers(params),
+    {
+      keepPreviousData: true,
+    }
+  );
+
+  return {
+    users: data?.data ?? [],
+    paginatorInfo: mapPaginatorData(data as any),
+    loading: isLoading,
+    error,
+  };
+};
+export const useMembersQuery = (params: Partial<QueryOptionsType>) => {
+  const { data, isLoading, error } = useQuery<UserPaginator, Error>(
+    [API_ENDPOINTS.CUSTOMERS, params],
+    () => userClient.fetchMembers(params),
     {
       keepPreviousData: true,
     }

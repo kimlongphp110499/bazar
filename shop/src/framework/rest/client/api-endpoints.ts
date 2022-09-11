@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
   ORDERS_DOWNLOADS: '/downloads',
   GENERATE_DOWNLOADABLE_PRODUCT_LINK: '/downloads/digital_file',
   USERS: '/users',
+  MEMBERS: '/user-customers',
   USERS_ADDRESS: '/address',
   USERS_ME: '/me',
   USERS_LOGIN: '/token',

@@ -35,6 +35,12 @@ use Marvel\Database\Models\Permission as ModelsPermission;
 use \Swift_SmtpTransport;
 use \Swift_Mailer;
 use \Swift_Message;
+use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Support\Facades\Redirect;
+use App\Models\PackageD;
+use App\Models\UserPackageD;
+use App\Models\OrderPackages;
+use App\Models\VNPay_Payment;
 
 
 
@@ -56,7 +62,15 @@ class UserController extends CoreController
     public function index(Request $request)
     {
         $limit = $request->limit ?   $request->limit : 15;
-        return $this->repository->with(['profile', 'address', 'permissions'])->paginate($limit);
+        //1 is Permission super admin
+        return $this->repository->with(['profile', 'address', 'permissions'])->join('model_has_permissions','model_has_permissions.model_id','=','users.id')->where('model_has_permissions.permission_id','=',1)->paginate($limit);
+    }
+
+    public function getCustomers(Request $request)
+    {
+        $limit = $request->limit ?   $request->limit : 15;
+        //1 is Permission super admin
+        return $this->repository->with(['profile', 'address', 'permissions'])->join('model_has_permissions','model_has_permissions.model_id','=','users.id')->where('model_has_permissions.permission_id','!=',1)->groupByRaw('users.id')->paginate($limit);
     }
 
     /**
@@ -157,9 +171,171 @@ class UserController extends CoreController
         $hashId = Hashids::encode($userId);
         return uniqid() . $userType . $hashId;
     }
+    public function vnpay_index(UserPackageD $request, $pack_id){
+    $price = 1200000;
+    $order = OrderPackages::create([
+        'user_id'=> $request->user_id,
+        'price' => $price,
+        'package_id' => $pack_id
+    ]);
+    $order = OrderPackages::where('id',38)->first();
+       return view('vnpay.index',compact('order'));
 
-    public function register(UserCreateRequest $request)
-    {
+   }
+
+   public function create_vnpay(Request $request){
+
+    $vnp_TmnCode = "GWC7RIQM"; //Website ID in VNPAY System
+    $vnp_HashSecret = "TYMPTRHCTUOVTPUKONECCTOWHGBKSXPN"; //Secret key
+    $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    $vnp_Returnurl = route('vnpay.return');
+    $vnp_apiUrl = "http://sandbox.vnpayment.vn/merchant_webapi/merchant.html";
+    //Config input format
+    //Expire
+     $startTime = date("YmdHis");
+  
+    $vnp_TxnRef = $_POST['Ma_hd']; //Mã đơn hàng. Trong thực tế Merchant cần insert đơn hàng vào DB và gửi mã này sang VNPAY
+    $vnp_OrderInfo = $_POST['order_desc'];
+    $vnp_OrderType = $_POST['order_type'];
+    $vnp_Amount = $_POST['amount'] * 100;
+    $vnp_Locale = $_POST['language'];
+    $vnp_BankCode = $_POST['bank_code'];
+    $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+    //Add Params of 2.0.1 Version
+    $vnp_ExpireDate = $_POST['txtexpire'];
+    //Billing$vnp_Bill_Mobile = $_POST['txt_billing_mobile'];
+    
+    $inputData = array(
+        "vnp_Version" => "2.1.0",
+        "vnp_TmnCode" => $vnp_TmnCode,
+        "vnp_Amount" => $vnp_Amount,
+        "vnp_Command" => "pay",
+        "vnp_CreateDate" => date('YmdHis'),
+        "vnp_CurrCode" => "VND",
+        "vnp_IpAddr" => $vnp_IpAddr,
+        "vnp_Locale" => $vnp_Locale,
+        "vnp_OrderInfo" => $vnp_OrderInfo,
+        "vnp_OrderType" => $vnp_OrderType,
+        "vnp_ReturnUrl" => $vnp_Returnurl,
+        "vnp_TxnRef" => $vnp_TxnRef,
+        "vnp_ExpireDate"=> $vnp_ExpireDate,
+    );
+    
+    if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+        $inputData['vnp_BankCode'] = $vnp_BankCode;
+    }
+    if (isset($vnp_Bill_State) && $vnp_Bill_State != "") {
+        $inputData['vnp_Bill_State'] = $vnp_Bill_State;
+    }
+    
+    //var_dump($inputData);
+    ksort($inputData);
+    $query = "";
+    $i = 0;
+    $hashdata = "";
+    foreach ($inputData as $key => $value) {
+        if ($i == 1) {
+            $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+        } else {
+            $hashdata .= urlencode($key) . "=" . urlencode($value);
+            $i = 1;
+        }
+        $query .= urlencode($key) . "=" . urlencode($value) . '&';
+    }
+    
+    $vnp_Url = $vnp_Url . "?" . $query;
+    if (isset($vnp_HashSecret)) {
+        $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//  
+        $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+    }
+    header('Location: ' . $vnp_Url);
+    die();
+
+}
+public function return_vnpay(Request $request){
+    $dt = Carbon::now('Asia/Ho_Chi_Minh');
+   if($request->vnp_TxnRef!=null && $request->vnp_ResponseCode=='00'){
+  
+    try{
+        DB::beginTransaction();
+    $order = OrderPackages::where('id',$request->vnp_TxnRef)->first();
+    $package = PackageD::where('id',$order->package_id)->first();
+   // $packDefault = UserPackageD::where('user_id', $order->user_id)->where('defaut_value', 1)->first();
+    $havePack = UserPackageD::where('user_id',$order->user_id)->first();
+        //DD($havePack);
+    $payment_vnp=array();
+    if($order){
+      
+            $payment_vnp['p_user_id'] = $order->user_id;
+            $payment_vnp['p_transaction_id']=$order->id;
+            $payment_vnp['p_transaction_code']=$request->vnp_TxnRef;
+            $payment_vnp['p_money']=$request->vnp_Amount;
+            $payment_vnp['p_node']=$request->vnp_OrderInfo;
+            $payment_vnp['p_vnp_response_code']=$request->vnp_ResponseCode;
+            $payment_vnp['p_code_vnpay']=$request->vnp_TransactionNo;
+            $payment_vnp['p_code_bank']=$request->vnp_BankCode;
+            $payment_vnp['p_time']= $dt->toDateTimeString();
+            
+            $payment_vnp = VNPay_Payment::insert($payment_vnp);
+    }
+    $date = Carbon::now();
+    $havePack->update([
+        'max_device' => $havePack->max_device + $package->max_device,
+        'defaut_value' => 0,
+        //'license_key' => Str::random(16),
+        'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->expDayTime),
+        'expDayTime' => $havePack->expDayTime + $package->expDayTime,
+    ]);
+    // if($packDefault)
+    // {
+    //  $result = $packDefault->update([
+    //      'max_device' => $package->max_device,
+    //      'defaut_value' => 0,
+    //      'license_key' => Str::random(16),
+    //      'expTime' =>  $date->addDays((int) $package->expDayTime),
+    //      'expDayTime' => $package->expDayTime,
+    //  ]);
+
+    // }
+    // else if($havePack)
+    // {
+    //  $result = $havePack->update([
+    //      'max_device' => $havePack->max_device + $package->max_device,
+    //      'defaut_value' => 0,
+    //      //'license_key' => Str::random(16),
+    //      'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->expDayTime),
+    //      'expDayTime' => $havePack->expDayTime + $package->expDayTime,
+    //  ]);
+
+     
+   // }
+    DB::commit();
+    return ["done" => 'done'];
+  }
+   catch(Exception $exception){
+      DB::rollBack();
+      Log::error('Message'.$exception->getMessage().'Line'.$exception->getLine());
+
+  }
+
+   }
+   return ['message' => SOMETHING_WENT_WRONG, 'success' => false];
+  
+}
+    public function newPackage(Request $request){
+        $date = Carbon::now();
+        $pack = PackageD::create([
+        'max_device' => auth()->user()->id,
+        'max_device' => $request->max_device,
+        'expDayTime' => $request->expDayTime,
+        'defaut_value' => 0,]);
+       $packDefault = UserPackageD::where('user_id',auth()->user()->id)->first();
+       //$havePack = UserPackageD::where('user_id',auth()->user()->id)->where('defaut_value', 0)->whereRaw('license_key is not Null')->first();
+       $result = $packDefault;
+       return $this->vnpay_index($result, $pack->id);
+    }
+    public function confirmRegister(Request $request){
+       
         $notAllowedPermissions = [Permission::SUPER_ADMIN];
         if ((isset($request->permission->value) && in_array($request->permission->value, $notAllowedPermissions)) || (isset($request->permission) && in_array($request->permission, $notAllowedPermissions))) {
             throw new MarvelException(NOT_AUTHORIZED);
@@ -173,15 +349,54 @@ class UserController extends CoreController
             'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
+        $packageDefault = PackageD::where('defaut_value',1)->first();
 
+        $date = Carbon::now();
+       
+        UserPackageD::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name.$user->id,
+            'package_id' => $packageDefault->id,
+            'max_device' => $packageDefault->max_device,
+            'defaut_value' => $packageDefault->defaut_value,
+            'license_key' => Str::random(16),
+            'expTime' =>  $date->addDays((int) $packageDefault->expDayTime),
+            'expDayTime' => $packageDefault->expDayTime,
+        ]);
+      
         $user->givePermissionTo($permissions);
         $this->giveSignupPointsToCustomer($user->id);
-        return ["token" => $user->createToken('auth_token')->plainTextToken, "permissions" => $user->getPermissionNames()];
+        $url = config('shop.shop_url_pakage'); // from shop -rest
+        $data = array(
+            'token' =>$user->createToken('auth_token')->plainTextToken,
+        );
+
+        $href = $url . '?' . http_build_query($data);
+        return  Redirect::away($href);
+  
     }
-    public function encodeToken(int $userId, string $userType): string
+    public function register(UserCreateRequest $request)
     {
-        $hashId = Hashids::encode($userId);
-        return uniqid() . $userType . $hashId;
+        $token= Hash::make(substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, 6));
+        $url = url('/');
+        $transport = (new Swift_SmtpTransport('smtp.gmail.com', 587, 'tls'))
+        ->setUsername(config('shop.admin_email'))
+        ->setPassword(config('shop.admin_password'));
+
+        // Create the Mailer using your created Transport
+        $mailer = new Swift_Mailer($transport);
+
+        // Create a message
+        $message = (new Swift_Message('Confim Email For Register User'))
+        ->setFrom(['kimlongxutede110499@gmail.com' => 'Admin Shop'])
+        ->setTo([$request->email => $request->email])
+        ->setBody(view('emails.register-user',  ['name' => $request->name, 'email' => $request->email,'password' => $request->password, 'url' => $url,])->render(),'text/html');
+
+        // Send the message
+        $result = $mailer->send($message);
+        return ["done" => 'done'];
+
+      
     }
 
     /**
@@ -190,7 +405,7 @@ class UserController extends CoreController
      * @param string $token
      * @return array|null
      */
-    public function decodeToken(string $token): ?array
+    public function decodeToken(string $token)
     {
         if (empty($token)) {
             return null;

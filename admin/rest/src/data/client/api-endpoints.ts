@@ -54,4 +54,5 @@ export const API_ENDPOINTS = {
   ORDER_EXPORT: 'export-order-url',
   ORDER_CREATE: 'order/create',
   ORDER_INVOICE_DOWNLOAD: 'download-invoice-url',
+  MEMBERS: '/user-customers',
 };

@@ -12,7 +12,11 @@ import { useTypes } from '@/framework/type';
 import useHomepage from '@/lib/hooks/use-homepage';
 import type { Type } from '@/types';
 import { TYPES_PER_PAGE } from '@/framework/client/variables';
-
+import { useToken } from '@/lib/hooks/use-token';
+import { useAtom } from 'jotai';
+import { authorizationAtom } from '@/store/authorization-atom';
+import { Routes } from '@/config/routes';
+import { useModalAction } from '@/components/ui/modal/modal.context';
 interface GroupsMenuProps {
   className?: string;
   groups?: Type[];
@@ -27,6 +31,14 @@ const GroupsMenu: React.FC<GroupsMenuProps> = ({
   variant = 'colored',
 }) => {
   const router = useRouter();
+  const { closeModal } = useModalAction();
+  if (router.query.token) { 
+    const { setToken } = useToken();
+    const [_, setAuthorized] = useAtom(authorizationAtom);
+      setToken(router.query.token as string);
+      router.replace('/token', undefined, { shallow: true });
+      window.location.replace('http://localhost:3003/');
+    }
   const selectedMenu =
     groups?.find((type) => router.asPath.includes(type?.slug)) ?? defaultGroup;
   return (

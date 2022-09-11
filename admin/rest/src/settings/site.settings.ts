@@ -98,7 +98,12 @@ export const siteSettings = {
       },
       {
         href: Routes.user.list,
-        label: 'sidebar-nav-item-users',
+        label: 'Customers',
+        icon: 'UsersIcon',
+      },
+      {
+        href: Routes.member,
+        label: 'Members',
         icon: 'UsersIcon',
       },
       {
