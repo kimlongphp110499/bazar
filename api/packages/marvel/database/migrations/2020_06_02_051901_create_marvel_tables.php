@@ -151,6 +151,7 @@ class CreateMarvelTables extends Migration
             $table->double('delivery_fee')->nullable();
             $table->string('delivery_time')->nullable();
             $table->softDeletes();
+            $table->enum('type', ['service','ecom'])->default('ecom');
             $table->timestamps();
             $table->foreign('status')->references('id')->on('order_status');
             $table->foreign('customer_id')->references('id')->on('users');

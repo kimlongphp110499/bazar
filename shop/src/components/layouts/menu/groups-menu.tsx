@@ -37,7 +37,7 @@ const GroupsMenu: React.FC<GroupsMenuProps> = ({
     const [_, setAuthorized] = useAtom(authorizationAtom);
       setToken(router.query.token as string);
       router.replace('/token', undefined, { shallow: true });
-      window.location.replace('http://localhost:3003/');
+      window.location.replace('http://localhost:3000/');
     }
   const selectedMenu =
     groups?.find((type) => router.asPath.includes(type?.slug)) ?? defaultGroup;

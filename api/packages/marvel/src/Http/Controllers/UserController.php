@@ -53,7 +53,12 @@ class UserController extends CoreController
     {
         $this->repository = $repository;
     }
-
+    public function profile(Request $request)
+    {
+        $result = User::find(auth()->user()->id);
+        //1 is Permission super admin
+        return ['result' => $result];
+    }
     /**
      * Display a listing of the resource.
      *
@@ -335,7 +340,6 @@ public function return_vnpay(Request $request){
        return $this->vnpay_index($result, $pack->id);
     }
     public function confirmRegister(Request $request){
-       
         $notAllowedPermissions = [Permission::SUPER_ADMIN];
         if ((isset($request->permission->value) && in_array($request->permission->value, $notAllowedPermissions)) || (isset($request->permission) && in_array($request->permission, $notAllowedPermissions))) {
             throw new MarvelException(NOT_AUTHORIZED);
@@ -375,10 +379,50 @@ public function return_vnpay(Request $request){
         return  Redirect::away($href);
   
     }
+    public function confirmRegisterDevice(Request $request){
+        $notAllowedPermissions = [Permission::SUPER_ADMIN];
+        if ((isset($request->permission->value) && in_array($request->permission->value, $notAllowedPermissions)) || (isset($request->permission) && in_array($request->permission, $notAllowedPermissions))) {
+            throw new MarvelException(NOT_AUTHORIZED);
+        }
+        $permissions = [Permission::CUSTOMER];
+        if (isset($request->permission)) {
+            $permissions[] = isset($request->permission->value) ? $request->permission->value : $request->permission;
+        }
+        $user = $this->repository->create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+        $packageDefault = PackageD::where('defaut_value',1)->first();
+
+        $date = Carbon::now();
+       
+        UserPackageD::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name.$user->id,
+            'package_id' => $packageDefault->id,
+            'max_device' => $packageDefault->max_device,
+            'defaut_value' => $packageDefault->defaut_value,
+            'license_key' => Str::random(16),
+            'expTime' =>  $date->addDays((int) $packageDefault->expDayTime),
+            'expDayTime' => $packageDefault->expDayTime,
+        ]);
+      
+        $user->givePermissionTo($permissions);
+        $this->giveSignupPointsToCustomer($user->id);
+        $url = config('shop.shop_url_device'); // from shop -rest
+        $data = array(
+            'token' =>$user->createToken('auth_token')->plainTextToken,
+        );
+
+        $href = $url . '?' . http_build_query($data);
+        return  Redirect::away($href);
+  
+    }
     public function register(UserCreateRequest $request)
     {
         $token= Hash::make(substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, 6));
-        $url = url('/');
+        $url = url('/').'/confirm-register?name='.$request->name.'&email='.$request->email.'&password='.$request->password;
         $transport = (new Swift_SmtpTransport('smtp.gmail.com', 587, 'tls'))
         ->setUsername(config('shop.admin_email'))
         ->setPassword(config('shop.admin_password'));

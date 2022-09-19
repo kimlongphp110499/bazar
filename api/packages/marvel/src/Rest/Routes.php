@@ -37,8 +37,10 @@ use Marvel\Http\Controllers\ResourceController;
 
 
 Route::get('/test', [UserController::class, 'test']);
+Route::get('/test', [UserController::class, 'test']);
 Route::post('/register', [UserController::class, 'register']);
-Route::post('/confirm-register', [UserController::class, 'confirmRegister']);
+Route::get('/confirm-register', [UserController::class, 'confirmRegister']);
+Route::get('/confirm-register-device', [UserController::class, 'confirmRegisterDevice']);
 Route::post('/token', [UserController::class, 'token']);
 Route::post('/logout', [UserController::class, 'logout']);
 Route::post('/forget-password', [UserController::class, 'forgetPassword']);
@@ -230,7 +232,7 @@ Route::get('export-products/{shop_id}', [ProductController::class, 'exportProduc
 Route::get('export-variation-options/{shop_id}', [ProductController::class, 'exportVariableOptions']);
 Route::post('import-attributes', [AttributeController::class, 'importAttributes']);
 Route::get('export-attributes/{shop_id}', [AttributeController::class, 'exportAttributes']);
-
+Route::get('profile', [UserController::class, 'profile']);
 Route::group(
     ['middleware' => ['permission:' . Permission::STORE_OWNER, 'auth:sanctum']],
     function () {
@@ -244,6 +246,7 @@ Route::group(
         Route::delete('staffs/{id}', [ShopController::class, 'deleteStaff']);
         Route::get('staffs', [UserController::class, 'staffs']);
         Route::get('my-shops', [ShopController::class, 'myShops']);
+       
     }
 );
 

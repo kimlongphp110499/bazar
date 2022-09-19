@@ -13,6 +13,7 @@ return [
     'admin_email' => 'kimlongxutede110499@gmail.com',
     'admin_password' => 'udiduxmhyzdsuiyj',
     'shop_url_pakage' => 'http://localhost:3003',
+    'shop_url_device' => 'http://localhost:3000',
 
     /*
     |--------------------------------------------------------------------------
