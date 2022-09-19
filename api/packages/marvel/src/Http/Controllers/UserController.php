@@ -442,6 +442,29 @@ public function return_vnpay(Request $request){
 
       
     }
+    public function registerDevice(UserCreateRequest $request)
+    {
+        $token= Hash::make(substr(str_shuffle('abcdefghijklmnopqrstuvwxyz0123456789'), 0, 6));
+        $url = url('/').'/confirm-register-device?name='.$request->name.'&email='.$request->email.'&password='.$request->password;
+        $transport = (new Swift_SmtpTransport('smtp.gmail.com', 587, 'tls'))
+        ->setUsername(config('shop.admin_email'))
+        ->setPassword(config('shop.admin_password'));
+
+        // Create the Mailer using your created Transport
+        $mailer = new Swift_Mailer($transport);
+
+        // Create a message
+        $message = (new Swift_Message('Confim Email For Register User'))
+        ->setFrom(['kimlongxutede110499@gmail.com' => 'Admin Shop'])
+        ->setTo([$request->email => $request->email])
+        ->setBody(view('emails.register-user',  ['name' => $request->name, 'email' => $request->email,'password' => $request->password, 'url' => $url,])->render(),'text/html');
+
+        // Send the message
+        $result = $mailer->send($message);
+        return ["done" => 'done'];
+
+      
+    }
 
     /**
      * Get a id number from token

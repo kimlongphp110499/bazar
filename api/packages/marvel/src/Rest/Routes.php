@@ -39,6 +39,7 @@ use Marvel\Http\Controllers\ResourceController;
 Route::get('/test', [UserController::class, 'test']);
 Route::get('/test', [UserController::class, 'test']);
 Route::post('/register', [UserController::class, 'register']);
+Route::post('/register-device', [UserController::class, 'registerDevice']);
 Route::get('/confirm-register', [UserController::class, 'confirmRegister']);
 Route::get('/confirm-register-device', [UserController::class, 'confirmRegisterDevice']);
 Route::post('/token', [UserController::class, 'token']);
