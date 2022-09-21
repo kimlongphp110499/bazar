@@ -22,6 +22,7 @@ Route::group(
     ['middleware' => ['auth:sanctum']],
     function () {
         Route::get('/list-shop', [PackageController::class, 'list']);
+        Route::get('/detail-shop/{id}', [PackageController::class, 'detail']);
 
     }
 );

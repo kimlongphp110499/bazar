@@ -20,7 +20,7 @@ class CreateUserPackagesTable extends Migration
             $table->unsignedBigInteger('package_id');
             $table->integer('max_device')->default(0)->nullable();
             $table->datetime('expTime')->nullable();
-            $table->integer('expDayTime')->nullable();
+            $table->integer('exp_day_time')->nullable();
             $table->string('license_key')->nullable();
             $table->boolean('defaut_value')->default(0)->nullable();
             $table->boolean('status')->default(0)->nullable();

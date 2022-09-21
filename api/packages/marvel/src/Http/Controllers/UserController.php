@@ -288,8 +288,8 @@ public function return_vnpay(Request $request){
         'max_device' => $havePack->max_device + $package->max_device,
         'defaut_value' => 0,
         //'license_key' => Str::random(16),
-        'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->expDayTime),
-        'expDayTime' => $havePack->expDayTime + $package->expDayTime,
+        'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->exp_day_time),
+        'exp_day_time' => $havePack->exp_day_time + $package->exp_day_time,
     ]);
     // if($packDefault)
     // {
@@ -297,8 +297,8 @@ public function return_vnpay(Request $request){
     //      'max_device' => $package->max_device,
     //      'defaut_value' => 0,
     //      'license_key' => Str::random(16),
-    //      'expTime' =>  $date->addDays((int) $package->expDayTime),
-    //      'expDayTime' => $package->expDayTime,
+    //      'expTime' =>  $date->addDays((int) $package->exp_day_time),
+    //      'exp_day_time' => $package->exp_day_time,
     //  ]);
 
     // }
@@ -308,8 +308,8 @@ public function return_vnpay(Request $request){
     //      'max_device' => $havePack->max_device + $package->max_device,
     //      'defaut_value' => 0,
     //      //'license_key' => Str::random(16),
-    //      'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->expDayTime),
-    //      'expDayTime' => $havePack->expDayTime + $package->expDayTime,
+    //      'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->exp_day_time),
+    //      'exp_day_time' => $havePack->exp_day_time + $package->exp_day_time,
     //  ]);
 
      
@@ -332,7 +332,7 @@ public function return_vnpay(Request $request){
         $pack = PackageD::create([
         'max_device' => auth()->user()->id,
         'max_device' => $request->max_device,
-        'expDayTime' => $request->expDayTime,
+        'exp_day_time' => $request->exp_day_time,
         'defaut_value' => 0,]);
        $packDefault = UserPackageD::where('user_id',auth()->user()->id)->first();
        //$havePack = UserPackageD::where('user_id',auth()->user()->id)->where('defaut_value', 0)->whereRaw('license_key is not Null')->first();
@@ -364,8 +364,8 @@ public function return_vnpay(Request $request){
             'max_device' => $packageDefault->max_device,
             'defaut_value' => $packageDefault->defaut_value,
             'license_key' => Str::random(16),
-            'expTime' =>  $date->addDays((int) $packageDefault->expDayTime),
-            'expDayTime' => $packageDefault->expDayTime,
+            'expTime' =>  $date->addDays((int) $packageDefault->exp_day_time),
+            'exp_day_time' => $packageDefault->exp_day_time,
         ]);
       
         $user->givePermissionTo($permissions);
@@ -404,8 +404,8 @@ public function return_vnpay(Request $request){
         //     'max_device' => $packageDefault->max_device,
         //     'defaut_value' => $packageDefault->defaut_value,
         //     'license_key' => Str::random(16),
-        //     'expTime' =>  $date->addDays((int) $packageDefault->expDayTime),
-        //     'expDayTime' => $packageDefault->expDayTime,
+        //     'expTime' =>  $date->addDays((int) $packageDefault->exp_day_time),
+        //     'exp_day_time' => $packageDefault->exp_day_time,
         // ]);
       
         $user->givePermissionTo($permissions);

@@ -15,7 +15,7 @@ class UserPackageD extends Model
         'user_name',
         'package_id',
         'max_device',
-        'expDayTime',
+        'exp_day_time',
         'expTime',
         'license_key',
         'defaut_value',

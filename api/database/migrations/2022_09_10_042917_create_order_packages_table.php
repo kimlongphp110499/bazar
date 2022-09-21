@@ -20,7 +20,7 @@ class CreateOrderPackagesTable extends Migration
             $table->unsignedBigInteger('package_id');
             $table->integer('max_device')->nullable();
             $table->datetime('expTime')->nullable();
-            $table->integer('expDayTime')->nullable();
+            $table->integer('exp_day_time')->nullable();
             $table->timestamps();
         });
     }

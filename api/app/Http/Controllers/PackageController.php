@@ -8,7 +8,12 @@ use App\Models\PackageD;
 class PackageController extends Controller
 {
     public function list(){
-        $resul = Package::get();
+        $result = PackageD::get();
+        return ['result'=>$result];
+    }
+
+    public function detail($id){
+        $result = PackageD::findOrFail($id);
         return ['result'=>$result];
     }
 }

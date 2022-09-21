@@ -20,7 +20,7 @@ class CreatePackagessTable extends Migration
             $table->string('desc')->nullable();
             $table->json('key')->nullable();
             $table->json('max_device')->nullable();
-            $table->json('expDayTime')->nullable();
+            $table->json('exp_day_time')->nullable();
             $table->boolean('defaut_value')->default(0)->nullable();
             $table->timestamps();
         });

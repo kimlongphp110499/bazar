@@ -16,7 +16,7 @@ class OrderPackages extends Model
         'price',
         'package_id',
         'max_device',
-        'expDayTime',
+        'exp_day_time',
         'expTime',
         'status',
     ];
