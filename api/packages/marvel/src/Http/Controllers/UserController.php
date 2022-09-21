@@ -397,16 +397,16 @@ public function return_vnpay(Request $request){
 
         $date = Carbon::now();
        
-        UserPackageD::create([
-            'user_id' => $user->id,
-            'user_name' => $user->name.$user->id,
-            'package_id' => $packageDefault->id,
-            'max_device' => $packageDefault->max_device,
-            'defaut_value' => $packageDefault->defaut_value,
-            'license_key' => Str::random(16),
-            'expTime' =>  $date->addDays((int) $packageDefault->expDayTime),
-            'expDayTime' => $packageDefault->expDayTime,
-        ]);
+        // UserPackageD::create([
+        //     'user_id' => $user->id,
+        //     'user_name' => $user->name.$user->id,
+        //     'package_id' => $packageDefault->id,
+        //     'max_device' => $packageDefault->max_device,
+        //     'defaut_value' => $packageDefault->defaut_value,
+        //     'license_key' => Str::random(16),
+        //     'expTime' =>  $date->addDays((int) $packageDefault->expDayTime),
+        //     'expDayTime' => $packageDefault->expDayTime,
+        // ]);
       
         $user->givePermissionTo($permissions);
         $this->giveSignupPointsToCustomer($user->id);

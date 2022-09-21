@@ -11,6 +11,9 @@ class PackageD extends Model
     protected $table = 'packages';
 
     protected $fillable = [
+        'name',
+        'desc',
+        'image',
         'key',
         'max_device',
         'expDayTime',

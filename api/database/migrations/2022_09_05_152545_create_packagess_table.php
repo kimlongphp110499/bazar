@@ -15,9 +15,12 @@ class CreatePackagessTable extends Migration
     {
         Schema::create('packages', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('key')->nullable();
-            $table->integer('max_device')->default(0)->nullable();
-            $table->integer('expDayTime')->nullable();
+            $table->string('image')->nullable();
+            $table->string('name')->nullable();
+            $table->string('desc')->nullable();
+            $table->json('key')->nullable();
+            $table->json('max_device')->nullable();
+            $table->json('expDayTime')->nullable();
             $table->boolean('defaut_value')->default(0)->nullable();
             $table->timestamps();
         });
