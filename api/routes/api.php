@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\OrderPackageController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +25,8 @@ Route::get('/detail-shop/{id}', [PackageController::class, 'detail']);
 Route::group(
     ['middleware' => ['auth:sanctum']],
     function () {
-       
+    Route::get('/list-order-package', [OrderPackageController::class, 'list']);
+
 
     }
 );

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class OrderPackages extends Model
 {
@@ -20,5 +21,9 @@ class OrderPackages extends Model
         'expTime',
         'status',
     ];
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->format("Y-m-d  H:i:s");
+    } 
     
 }
