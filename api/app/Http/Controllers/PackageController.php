@@ -9,7 +9,7 @@ class PackageController extends Controller
 {
     public function list(){
         $result = PackageD::get();
-        return $result;
+        return ['result' => $result];
     }
 
     public function detail($id){
