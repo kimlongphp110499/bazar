@@ -155,7 +155,7 @@ class UserController extends CoreController
         ]);
 
         $user = User::where('email', $request->email)->where('is_active', true)->first();
-
+        
         if (!$user || !Hash::check($request->password, $user->password)) {
             return ["token" => null, "permissions" => []];
         }
@@ -176,14 +176,19 @@ class UserController extends CoreController
         $hashId = Hashids::encode($userId);
         return uniqid() . $userType . $hashId;
     }
-    public function vnpay_index(UserPackageD $request, $pack_id){
+    public function vnpay_index(Request $request,$id){
     $price = 1200000;
-    $order = OrderPackages::create([
-        'user_id'=> $request->user_id,
+    $date = Carbon::now();
+
+     $order = OrderPackages::create([
+        'user_id'=> $id,
         'price' => $price,
-        'package_id' => $pack_id
+        'package_id' => $request->package_id,
+        'expTime' => $date->addDays((int) $request->exp_day_time),
+        'max_device' => $request->max_device,
+        'exp_day_time' => $request->exp_day_time,
     ]);
-    $order = OrderPackages::where('id',38)->first();
+    $order = OrderPackages::where('id',$order->id)->first();
        return view('vnpay.index',compact('order'));
 
    }
@@ -258,17 +263,19 @@ class UserController extends CoreController
 
 }
 public function return_vnpay(Request $request){
+    
     $dt = Carbon::now('Asia/Ho_Chi_Minh');
-   if($request->vnp_TxnRef!=null && $request->vnp_ResponseCode=='00'){
-  
+   if($request->vnp_TxnRef != null && $request->vnp_ResponseCode=='00'){
+   
     try{
         DB::beginTransaction();
     $order = OrderPackages::where('id',$request->vnp_TxnRef)->first();
-    $package = PackageD::where('id',$order->package_id)->first();
-   // $packDefault = UserPackageD::where('user_id', $order->user_id)->where('defaut_value', 1)->first();
-    $havePack = UserPackageD::where('user_id',$order->user_id)->first();
-        //DD($havePack);
+     
+    $havePack = UserPackageD::where('user_id',$order->user_id)->where('package_id',$order->package_id)->first();
+    
+  
     $payment_vnp=array();
+    
     if($order){
       
             $payment_vnp['p_user_id'] = $order->user_id;
@@ -284,36 +291,31 @@ public function return_vnpay(Request $request){
             $payment_vnp = VNPay_Payment::insert($payment_vnp);
     }
     $date = Carbon::now();
-    $havePack->update([
-        'max_device' => $havePack->max_device + $package->max_device,
-        'defaut_value' => 0,
-        //'license_key' => Str::random(16),
-        'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->exp_day_time),
-        'exp_day_time' => $havePack->exp_day_time + $package->exp_day_time,
-    ]);
-    // if($packDefault)
-    // {
-    //  $result = $packDefault->update([
-    //      'max_device' => $package->max_device,
-    //      'defaut_value' => 0,
-    //      'license_key' => Str::random(16),
-    //      'expTime' =>  $date->addDays((int) $package->exp_day_time),
-    //      'exp_day_time' => $package->exp_day_time,
-    //  ]);
+    if(!$havePack)
+    {
+        UserPackageD::create([
+            'user_id' => $order->user_id,
+            'user_name' => $order->user_id.$order->package_id,
+            'package_id' => $order->package_id,
+            'max_device' => $order->max_device,
+            // 'defaut_value' => $packageDefault->defaut_value,
+            'license_key' => Str::random(16),
+            'expTime' =>  $date->addDays((int) $order->exp_day_time),
+            'exp_day_time' => $order->exp_day_time,
+        ]);
+       
+    }
+    else{
+        $havePack->update([
+            'max_device' => $havePack->max_device + $order->max_device,
+            'defaut_value' => 0,
+            //'license_key' => Str::random(16),
+            'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $order->exp_day_time),
+            'exp_day_time' => $havePack->exp_day_time + $order->exp_day_time,
+        ]);
+    }
+    $order->update(['status'=>1]);
 
-    // }
-    // else if($havePack)
-    // {
-    //  $result = $havePack->update([
-    //      'max_device' => $havePack->max_device + $package->max_device,
-    //      'defaut_value' => 0,
-    //      //'license_key' => Str::random(16),
-    //      'expTime' =>  Carbon::parse($havePack->expTime)->addDays((int) $package->exp_day_time),
-    //      'exp_day_time' => $havePack->exp_day_time + $package->exp_day_time,
-    //  ]);
-
-     
-   // }
     DB::commit();
     return ["done" => 'done'];
   }

@@ -9,11 +9,11 @@ class PackageController extends Controller
 {
     public function list(){
         $result = PackageD::get();
-        return ['result'=>$result];
+        return $result;
     }
 
     public function detail($id){
-        $result = PackageD::findOrFail($id);
-        return ['result'=>$result];
+        $result = PackageD::find($id);
+        return ['result' => $result];
     }
 }

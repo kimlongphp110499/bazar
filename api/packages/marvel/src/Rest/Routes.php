@@ -57,7 +57,7 @@ Route::get('top-manufacturers', [ManufacturerController::class, 'topManufacturer
 Route::get('popular-products', [ProductController::class, 'popularProducts']);
 Route::get('check-availability', [ProductController::class, 'checkAvailability']);
 //vnpay
-Route::get('payment/vnpay/{pack_id}', [UserController::class, 'vnpay_index'])->name('payment.vnpay');
+Route::get('payment/vnpay/{id}', [UserController::class, 'vnpay_index'])->name('payment.vnpay');
 Route::post('/create-vnpay', [UserController::class, 'create_vnpay']);
 Route::get('/return-vnpay', [UserController::class, 'return_vnpay'])->name('vnpay.return');
 

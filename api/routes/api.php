@@ -18,11 +18,12 @@ use App\Http\Controllers\PackageController;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/list-shop', [PackageController::class, 'list']);
+Route::get('/detail-shop/{id}', [PackageController::class, 'detail']);
 Route::group(
     ['middleware' => ['auth:sanctum']],
     function () {
-        Route::get('/list-shop', [PackageController::class, 'list']);
-        Route::get('/detail-shop/{id}', [PackageController::class, 'detail']);
+       
 
     }
 );
