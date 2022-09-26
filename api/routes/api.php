@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\OrderPackageController;
+use App\Http\Controllers\LeaderBoardController;
 
 
 /*
@@ -22,6 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 Route::get('/list-shop', [PackageController::class, 'list']);
 Route::get('/detail-shop/{id}', [PackageController::class, 'detail']);
+Route::get('/list-leader-board', [LeaderBoardController::class, 'lists']);
 Route::group(
     ['middleware' => ['auth:sanctum']],
     function () {
