@@ -9,34 +9,67 @@ use Carbon\Carbon;
 class LeaderBoardController extends Controller
 {
     public function lists(Request $request){
+        $top1 = null;
+        $top2 = null;
+        $top3 = null;
+        $top10 = null;
         if($request->week)
         {
             $current_week = Carbon::today()->week-2;
             $top1 = OrderPackages::selectRaw('week(order_packages.created_at), users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
             ->whereRaw('week(order_packages.created_at) = '. $current_week)->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(1)->first();
-            $top2 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
-            ->whereRaw('week(order_packages.created_at) ='.  $current_week)->whereNotIn('user_id',[$top1->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
-            $top3 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
-            ->whereRaw('week(order_packages.created_at) ='. $current_week)->whereNotIn('user_id',[$top1->user_id, $top2->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
-            $top10 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
-            ->whereRaw('week(order_packages.created_at) ='. $current_week)->whereNotIn('user_id',[$top1->user_id, $top2->user_id,$top3->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(10)->get();
+            if($top1 !== null)
+            {
+                $top2 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
+                ->whereRaw('week(order_packages.created_at) ='.  $current_week)->whereNotIn('user_id',[$top1->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
+            }
+            if($top2 !== null)
+            {
+                $top3 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
+                ->whereRaw('week(order_packages.created_at) ='. $current_week)->whereNotIn('user_id',[$top1->user_id, $top2->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
+            }
+            if($top3 !== null)
+            {
+                $top10 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
+                ->whereRaw('week(order_packages.created_at) ='. $current_week)->whereNotIn('user_id',[$top1->user_id, $top2->user_id,$top3->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(10)->get();
+            }
         }
         if($request->month)
         {
+            
             $top1 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
             ->whereRaw('month(order_packages.created_at) ='. Carbon::today()->month)->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(1)->first();
-            $top2 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
-            ->whereRaw('month(order_packages.created_at) ='. Carbon::today()->month)->whereNotIn('user_id',[$top1->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
-            $top3 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
-            ->whereRaw('month(order_packages.created_at) ='. Carbon::today()->month)->whereNotIn('user_id',[$top1->user_id, $top2->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
-            $top10 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
-            ->whereRaw('month(order_packages.created_at) ='. Carbon::today()->month)->whereNotIn('user_id',[$top1->user_id, $top2->user_id,$top3->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(10)->get();
+            if($top1 !== null)
+            {
+                $top2 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
+                ->whereRaw('month(order_packages.created_at) ='. Carbon::today()->month)->whereNotIn('user_id',[$top1->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
+            }
+            if($top2 !== null)
+            {
+                $top3 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
+                ->whereRaw('month(order_packages.created_at) ='. Carbon::today()->month)->whereNotIn('user_id',[$top1->user_id, $top2->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
+            }
+            if($top3 !== null)
+            {
+                $top10 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')
+                ->whereRaw('month(order_packages.created_at) ='. Carbon::today()->month)->whereNotIn('user_id',[$top1->user_id, $top2->user_id,$top3->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(10)->get();
+            }
         }
         else if(!$request->month && !$request->week) {
             $top1 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(1)->first();
-            $top2 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')->whereNotIn('user_id',[$top1->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
-            $top3 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')->whereNotIn('user_id',[$top1->user_id, $top2->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
-            $top10 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')->whereNotIn('user_id',[$top1->user_id, $top2->user_id,$top3->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(10)->get();
+            if($top1 !== null)
+            {
+                $top2 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')->whereNotIn('order_packages.user_id',[$top1->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
+            }
+            if($top2 !== null)
+            {
+                $top3 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')->whereNotIn('order_packages.user_id',[$top1->user_id, $top2->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(2)->first();
+            }
+            if($top3 !== null)
+            {
+                $top10 = OrderPackages::selectRaw('users.name, order_packages.user_id ,sum(price) as total')->fromRaw('users, order_packages')->whereRaw('users.id = order_packages.user_id')->whereNotIn('order_packages.user_id',[$top1->user_id, $top2->user_id,$top3->user_id])->groupByRaw('order_packages.user_id')->orderBy('total','DESC')->limit(10)->get();
+            }
+
     
         }
      
