@@ -450,10 +450,10 @@ class OrderController extends CoreController
        
         try{
             DB::beginTransaction();
-        $coint = $request->vnp_Amount*1;
+        $coint = $request->vnp_Amount/100;
         $order = OrderPackages::where('id',$request->vnp_TxnRef)->first(); 
         $wallet = Wallet::where('customer_id', $order->user_id)->first();
-        $update_wallet =  $wallet->update(['total_points'=> $wallet->total_points +$coint,
+        $update_wallet =  $wallet->update(['total_points'=> $wallet->total_points + $coint,
         'available_points'=> $wallet->available_points +  $coint]);
 
         $payment_vnp=array();
