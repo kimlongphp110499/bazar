@@ -12,7 +12,11 @@ class Wallet extends Model
     protected $table = 'wallets';
 
     public $guarded = [];
-
+    protected $fillable = [
+        'customer_id',
+        'total_points',
+        'available_points',
+    ];
     /**
      * @return BelongsToMany
      */

@@ -35,6 +35,11 @@ use Marvel\Http\Controllers\DeliveryTimeController;
 use Marvel\Http\Controllers\LanguageController;
 use Marvel\Http\Controllers\ResourceController;
 
+//for order point 
+
+Route::get('/order-point-vnpay', [OrderController::class, 'OrderPointVnpay']);
+Route::get('/return-vnpay-point', [OrderController::class, 'return_vnpay_point'])->name('vnpay.return.point');
+
 
 Route::get('/test', [UserController::class, 'test']);
 Route::get('/test', [UserController::class, 'test']);

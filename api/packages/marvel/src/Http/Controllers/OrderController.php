@@ -32,6 +32,12 @@ use Marvel\Database\Repositories\OrderRepository;
 use niklasravnsborg\LaravelPdf\Facades\Pdf as PDF;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use App\Models\OrderPackages;
+use Illuminate\Support\Facades\Redirect;
+use Laravel\Sanctum\PersonalAccessToken;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Models\VNPay_Payment;
 
 class OrderController extends CoreController
 {
@@ -359,4 +365,137 @@ class OrderController extends CoreController
 
         return $pdf->download($filename);
     }
+
+    // for wallet
+    public function OrderPointVnpay(Request $request){
+        $bearerToken = $request->token;
+
+        $token = PersonalAccessToken::findToken($bearerToken);
+        $order = OrderPackages::create([
+            'user_id'=> $token->tokenable->id,
+            'price' => $request->amount,
+        ]);
+        date_default_timezone_set('Asia/Ho_Chi_Minh');
+        $startTime = date("YmdHis");
+        $txtexpire = date('YmdHis',strtotime('+15 minutes',strtotime($startTime)));
+
+        $vnp_TmnCode = "GWC7RIQM"; //Website ID in VNPAY System
+        $vnp_HashSecret = "TYMPTRHCTUOVTPUKONECCTOWHGBKSXPN"; //Secret key
+        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+        $vnp_Returnurl = route('vnpay.return.point');
+        $vnp_apiUrl = "http://sandbox.vnpayment.vn/merchant_webapi/merchant.html";
+        //Config input format
+        //Expire      
+        $vnp_TxnRef = $order->id; //Mã đơn hàng. Trong thực tế Merchant cần insert đơn hàng vào DB và gửi mã này sang VNPAY
+        $vnp_OrderInfo = 'Coin Payment';
+        $vnp_OrderType = 'billpayment';
+        $vnp_Amount = $request->amount * 100;
+        $vnp_Locale = 'vn';
+        $vnp_BankCode = '';
+        $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+        //Add Params of 2.0.1 Version
+        $vnp_ExpireDate = $txtexpire;
+        //Billing$vnp_Bill_Mobile = $_POST['txt_billing_mobile'];
+        
+        $inputData = array(
+            "vnp_Version" => "2.1.0",
+            "vnp_TmnCode" => $vnp_TmnCode,
+            "vnp_Amount" => $vnp_Amount,
+            "vnp_Command" => "pay",
+            "vnp_CreateDate" => date('YmdHis'),
+            "vnp_CurrCode" => "VND",
+            "vnp_IpAddr" => $vnp_IpAddr,
+            "vnp_Locale" => $vnp_Locale,
+            "vnp_OrderInfo" => $vnp_OrderInfo,
+            "vnp_OrderType" => $vnp_OrderType,
+            "vnp_ReturnUrl" => $vnp_Returnurl,
+            "vnp_TxnRef" => $vnp_TxnRef,
+            "vnp_ExpireDate"=> $vnp_ExpireDate,
+        );
+        
+        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+            $inputData['vnp_BankCode'] = $vnp_BankCode;
+        }
+        if (isset($vnp_Bill_State) && $vnp_Bill_State != "") {
+            $inputData['vnp_Bill_State'] = $vnp_Bill_State;
+        }
+        
+        //var_dump($inputData);
+        ksort($inputData);
+        $query = "";
+        $i = 0;
+        $hashdata = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+        
+        $vnp_Url = $vnp_Url . "?" . $query;
+        if (isset($vnp_HashSecret)) {
+            $vnpSecureHash =   hash_hmac('sha512', $hashdata, $vnp_HashSecret);//  
+            $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+        }
+        header('Location: ' . $vnp_Url);
+        die();
+    }
+    public function return_vnpay_point(Request $request){
+    
+        $dt = Carbon::now('Asia/Ho_Chi_Minh');
+       if($request->vnp_TxnRef != null && $request->vnp_ResponseCode=='00'){
+       
+        try{
+            DB::beginTransaction();
+        $coint = $request->vnp_Amount*1;
+        $order = OrderPackages::where('id',$request->vnp_TxnRef)->first(); 
+        $wallet = Wallet::where('customer_id', $order->user_id)->first();
+        $update_wallet =  $wallet->update(['total_points'=> $wallet->total_points +$coint,
+        'available_points'=> $wallet->available_points +  $coint]);
+
+        $payment_vnp=array();
+        
+        if($order){
+          
+                $payment_vnp['p_user_id'] = $order->user_id;
+                $payment_vnp['p_transaction_id']=$order->id;
+                $payment_vnp['p_transaction_code']=$request->vnp_TxnRef;
+                $payment_vnp['p_money']=$request->vnp_Amount;
+                $payment_vnp['p_node']=$request->vnp_OrderInfo;
+                $payment_vnp['p_vnp_response_code']=$request->vnp_ResponseCode;
+                $payment_vnp['p_code_vnpay']=$request->vnp_TransactionNo;
+                $payment_vnp['p_code_bank']=$request->vnp_BankCode;
+                $payment_vnp['p_time']= $dt->toDateTimeString();
+                
+                $payment_vnp = VNPay_Payment::insert($payment_vnp);
+        }
+        $date = Carbon::now();
+        $order->update(['status'=>1]);
+    
+        DB::commit();
+        $user = User::where('id', $order->user_id)->first();
+        $url = config('shop.shop_url_device'); // from shop -rest
+        $data = array(
+            'token' => $user->createToken('auth_token')->plainTextToken,
+            'redirect' => '/wallet',
+        );
+
+        $href = $url . '?' . http_build_query($data);
+        return  Redirect::away($href);
+  
+       // return ["done" => 'done'];
+      }
+       catch(Exception $exception){
+          DB::rollBack();
+          Log::error('Message'.$exception->getMessage().'Line'.$exception->getLine());
+    
+        }
+       }
+       return ['message' => SOMETHING_WENT_WRONG, 'success' => false];
+      
+    }
+
 }
