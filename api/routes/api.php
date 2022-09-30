@@ -21,14 +21,15 @@ use App\Http\Controllers\LeaderBoardController;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::get('/list-shop', [PackageController::class, 'list']);
-Route::get('/detail-shop/{id}', [PackageController::class, 'detail']);
+Route::get('/list-shop', [PackageController::class, 'service']);
+Route::get('/detail-shop/{id}', [PackageController::class, 'service_find']);
+Route::get('/package-detail/{id}', [PackageController::class, 'package_detail']);
 Route::get('/list-leader-board', [LeaderBoardController::class, 'lists']);
 Route::group(
     ['middleware' => ['auth:sanctum']],
     function () {
     Route::get('/list-order-package', [OrderPackageController::class, 'list']);
-
+    Route::post('/package/checkout', [OrderPackageController::class, 'checkout']);
 
     }
 );

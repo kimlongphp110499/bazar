@@ -16,27 +16,20 @@ class PackageD extends Model
         'name',
         'desc',
         'image',
-        'key',
-        'max_device',
-        'exp_day_time',
-        'defaut_value',
+        'service_id',
     ];
 
-    public function getKeyAttribute($value)
-    {
-        return json_decode($value);
-    }
-    public function getImageAttribute($value)
-    {
-        $path = \Storage::disk()->url('');
-        return url('/').$path.$value;
-    }
-    public function getExpDayTimeAttribute($value)
-    {
-        return json_decode($value);
-    } 
-    public function getMaxDeviceAttribute($value)
-    {
-        return json_decode($value);
-    }
+    // public function getKeyAttribute($value)
+    // {
+    //     return json_decode($value);
+    // }
+   
+    // public function getExpDayTimeAttribute($value)
+    // {
+    //     return json_decode($value);
+    // } 
+    // public function getMaxDeviceAttribute($value)
+    // {
+    //     return json_decode($value);
+    // }
 }
