@@ -30,10 +30,10 @@ class PackageController extends Controller
         $package = PackageD::create(['service_id' => $request->service_id,
                                          'name'=>$request->name,]);
 
-        return compact('result');
+        return compact('package');
     }
-    public function package_properties(Request $request){
-        $package_detail = PackageDetail::create(['package_id' => $request->package_id,
+    public function package_properties(Request $request, $id){
+        $package_detail = PackageDetail::create(['package_id' => $id,
                                           'max_device'=>$request->max_device,
                                           'price'=>$request->price,
                                           'exp_day_time'=>$request->exp_day_time,]);

@@ -25,11 +25,14 @@ Route::get('/list-shop', [PackageController::class, 'service']);
 Route::get('/detail-shop/{id}', [PackageController::class, 'service_find']);
 Route::get('/package-detail/{id}', [PackageController::class, 'package_detail']);
 Route::get('/list-leader-board', [LeaderBoardController::class, 'lists']);
+Route::post('/package/create', [PackageController::class, 'package_create']);
+Route::post('/package/properties/{id}', [PackageController::class, 'package_properties']);
 Route::group(
     ['middleware' => ['auth:sanctum']],
     function () {
     Route::get('/list-order-package', [OrderPackageController::class, 'list']);
     Route::post('/package/checkout', [OrderPackageController::class, 'checkout']);
+
 
     }
 );
